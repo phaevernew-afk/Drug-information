@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>本院藥品手冊查詢系統</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>本院藥品手冊</h1>
+        <p>藥品查詢系統</p>
+    </div>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="搜尋藥品名稱、學名、適應症...">
+        <select id="categoryFilter">
+            <option value="">全部分類</option>
+            <option value="化學治療劑">化學治療劑</option>
+        </select>
+    </div>
+
+    <div id="cardContainer" class="card-grid"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
