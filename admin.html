@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用藥管理後台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;background:#f5f5f5;color:#1a1a1a;font-size:14px}
+header{background:#1a4f8a;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:12px}
+header h1{font-size:18px;font-weight:500}
+.btn{height:36px;padding:0 16px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;border:1px solid #d0d0d0;background:#fff;color:#333;transition:all .15s}
+.btn:hover{border-color:#1a4f8a;color:#1a4f8a}
+.btn-primary{background:#1a4f8a;color:#fff;border-color:#1a4f8a}
+.btn-primary:hover{background:#15407a}
+.btn-danger{background:#dc3545;color:#fff;border-color:#dc3545}
+.btn-danger:hover{background:#b02a37}
+.btn-success{background:#198754;color:#fff;border-color:#198754}
+.btn-success:hover{background:#146c43}
+.toolbar{background:#fff;padding:12px 20px;border-bottom:1px solid #e0e0e0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.toolbar input{height:36px;border:1px solid #d0d0d0;border-radius:6px;padding:0 12px;font-size:13px;font-family:inherit;outline:none}
+.toolbar input:focus{border-color:#1a4f8a}
+.status{margin-left:auto;font-size:12px;color:#888}
+.table-wrap{padding:16px 20px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+th{background:#f0f4fa;color:#444;font-weight:600;font-size:12px;text-align:left;padding:10px 12px;border-bottom:1px solid #e0e0e0;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f0f0f0;font-size:13px;vertical-align:top}
+tr:hover td{background:#fafcff}
+td.name-col{max-width:220px;word-break:break-all;font-weight:500;color:#1a4f8a;cursor:pointer}
+td.name-col:hover{text-decoration:underline}
+td.indication-col{max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#555}
+.badge-preg{display:inline-block;font-size:11px;padding:2px 7px;border-radius:8px;font-weight:600}
+.preg-A,.preg-B{background:#d4edda;color:#155724}
+.preg-C{background:#fff3cd;color:#856404}
+.preg-D,.preg-X{background:#f8d7da;color:#721c24}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:10px;width:100%;max-width:680px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-header{background:#1a4f8a;color:#fff;padding:16px 20px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center}
+.modal-header h2{font-size:16px;font-weight:500}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:18px}
+.modal-body{padding:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.4px}
+.form-group input,.form-group select,.form-group textarea{border:1px solid #d0d0d0;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#1a4f8a;box-shadow:0 0 0 3px rgba(26,79,138,.1)}
+.form-group textarea{resize:vertical;min-height:60px}
+.modal-footer{padding:16px 20px;border-top:1px solid #e0e0e0;display:flex;gap:10px;justify-content:flex-end}
+.pagination{padding:12px 20px;display:flex;gap:6px;align-items:center;font-size:13px;color:#666}
+.page-btn{width:32px;height:32px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;cursor:pointer;font-size:13px}
+.page-btn:hover{border-color:#1a4f8a;color:#1a4f8a}
+.page-btn.active{background:#1a4f8a;color:#fff;border-color:#1a4f8a}
+.export-section{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px 20px;margin:0 20px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.export-section h3{font-size:14px;font-weight:500;color:#333;flex:1}
+</style>
+</head>
+<body>
+
+<header>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+  <h1>用藥管理後台</h1>
+  <a href="index.html" style="margin-left:auto;color:rgba(255,255,255,.8);font-size:13px;text-decoration:none">← 回查詢介面</a>
+</header>
+
+<div class="toolbar">
+  <input type="text" id="kw" placeholder="搜尋藥品…" oninput="renderTable()" style="width:240px">
+  <button class="btn btn-primary" onclick="openAdd()">+ 新增藥品</button>
+  <button class="btn btn-success" onclick="exportJSON()">⬇ 匯出 JSON</button>
+  <button class="btn" onclick="document.getElementById('import-file').click()">⬆ 匯入 JSON</button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(this)">
+  <span class="status" id="status">共 0 筆</span>
+</div>
+
+<div class="export-section">
+  <h3>📌 如何更新網站資料？</h3>
+  <span style="font-size:12px;color:#666">編輯後 → 點「匯出 JSON」→ 將 drugs.json 上傳取代 GitHub 上的同名檔案 → 或直接把修改後的 index.html 整個上傳</span>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>藥品名稱</th><th>中文名</th><th>學名</th>
+        <th>分類</th><th>適應症</th><th>孕婦</th><th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+<div class="pagination" id="pagination"></div>
+
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">新增藥品</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>識別碼</label><input id="f-id" type="number"></div>
+        <div class="form-group"><label>索引1</label><input id="f-idx1" maxlength="5"></div>
+        <div class="form-group full"><label>藥品全名</label><input id="f-drug"></div>
+        <div class="form-group"><label>藥品名稱</label><input id="f-name"></div>
+        <div class="form-group"><label>中文名</label><input id="f-cname"></div>
+        <div class="form-group"><label>學名</label><input id="f-generic"></div>
+        <div class="form-group"><label>原廠名</label><input id="f-brand"></div>
+        <div class="form-group"><label>商品名</label><input id="f-trade"></div>
+        <div class="form-group"><label>孕婦分級</label>
+          <select id="f-preg"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>X</option></select>
+        </div>
+        <div class="form-group"><label>外觀</label><input id="f-appearance"></div>
+        <div class="form-group full"><label>分類（藥理作用）</label><input id="f-cat"></div>
+        <div class="form-group full"><label>適應症</label><textarea id="f-indication" rows="2"></textarea></div>
+        <div class="form-group full"><label>用法用量</label><textarea id="f-dosage" rows="2"></textarea></div>
+        <div class="form-group full"><label>藥理作用</label><textarea id="f-pharm" rows="2"></textarea></div>
+        <div class="form-group full"><label>副作用</label><textarea id="f-sideEffect" rows="2"></textarea></div>
+        <div class="form-group full"><label>注意事項</label><textarea id="f-caution" rows="2"></textarea></div>
+        <div class="form-group full"><label>備註</label><input id="f-note"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btn-delete" onclick="deleteDrug()" style="margin-right:auto;display:none">刪除</button>
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveDrug()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let DRUGS = JSON.parse(localStorage.getItem('drugs_data') || 'null') || [];
+let editId = null;
+const PAGE_SIZE = 30;
+let page = 1;
+
+function pregClass(p){
+  if(!p) return '';
+  if(p==='A'||p==='B') return 'preg-A';
+  if(p==='C') return 'preg-C';
+  return 'preg-D';
+}
+
+function getFiltered(){
+  const kw = (document.getElementById('kw').value||'').toLowerCase();
+  return DRUGS.filter(d => !kw || [d.drug,d.name,d.generic,d.cname,d.trade].join(' ').toLowerCase().includes(kw));
+}
+
+function renderTable(){
+  const filtered = getFiltered();
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total/PAGE_SIZE));
+  if(page > totalPages) page = totalPages;
+  const slice = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+  document.getElementById('status').textContent = `共 ${DRUGS.length} 筆`;
+  document.getElementById('tbody').innerHTML = slice.map(d => `
+    <tr>
+      <td>${d.id||''}</td>
+      <td class="name-col" onclick="openEdit(${d.id})">${d.drug}</td>
+      <td>${d.cname||''}</td>
+      <td style="color:#666;font-size:12px">${d.generic||''}</td>
+      <td style="font-size:12px;color:#1a4f8a;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.cat||''}</td>
+      <td class="indication-col">${d.indication||''}</td>
+      <td>${d.preg?`<span class="badge-preg ${pregClass(d.preg)}">${d.preg}</span>`:''}</td>
+      <td><button class="btn" style="height:28px;padding:0 10px;font-size:12px" onclick="openEdit(${d.id})">編輯</button></td>
+    </tr>
+  `).join('');
+  
+  // Pagination
+  const pag = document.getElementById('pagination');
+  if(totalPages <= 1){pag.innerHTML='';return;}
+  let pages = [];
+  for(let i=1;i<=totalPages;i++){
+    if(i===1||i===totalPages||Math.abs(i-page)<=2) pages.push(i);
+    else if(pages[pages.length-1]!=='…') pages.push('…');
+  }
+  pag.innerHTML = `第 ${page}/${totalPages} 頁 &nbsp;` + pages.map(p2=>
+    p2==='…' ? '<span style="padding:0 4px">…</span>'
+    : `<button class="page-btn${p2===page?' active':''}" onclick="goPage(${p2})">${p2}</button>`
+  ).join('');
+}
+
+function goPage(p2){page=p2;renderTable();}
+
+function openAdd(){
+  editId = null;
+  document.getElementById('modal-title').textContent = '新增藥品';
+  document.getElementById('btn-delete').style.display='none';
+  ['id','drug','name','cname','generic','brand','trade','idx1','preg','appearance','cat','indication','dosage','pharm','sideEffect','caution','note'].forEach(f=>{
+    const el=document.getElementById('f-'+f);
+    if(el) el.value='';
+  });
+  const maxId = DRUGS.length ? Math.max(...DRUGS.map(d=>d.id||0)) : 0;
+  document.getElementById('f-id').value = maxId+1;
+  document.getElementById('modal-bg').classList.add('show');
+}
+
+function openEdit(id){
+  const d = DRUGS.find(x=>x.id===id);
+  if(!d) return;
+  editId = id;
+  document.getElementById('modal-title').textContent = '編輯藥品';
+  document.getElementById('btn-delete').style.display='inline-block';
+  const map = {id:'id',drug:'drug',name:'name',cname:'cname',generic:'generic',brand:'brand',trade:'trade',idx1:'idx1',preg:'preg',appearance:'appearance',cat:'cat',indication:'indication',dosage:'dosage',pharm:'pharm',sideEffect:'sideEffect',caution:'caution',note:'note'};
+  Object.entries(map).forEach(([fld,key])=>{
+    const el=document.getElementById('f-'+fld);
+    if(el) el.value=d[key]||'';
+  });
+  document.getElementById('modal-bg').classList.add('show');
+}
+
+function saveDrug(){
+  const get = id => (document.getElementById(id)||{}).value||'';
+  const d = {
+    id: parseInt(get('f-id'))||0,
+    drug: get('f-drug'), name: get('f-name'), cname: get('f-cname'),
+    generic: get('f-generic'), brand: get('f-brand'), trade: get('f-trade'),
+    idx1: get('f-idx1'), preg: get('f-preg'), appearance: get('f-appearance'),
+    cat: get('f-cat'), indication: get('f-indication'), dosage: get('f-dosage'),
+    pharm: get('f-pharm'), sideEffect: get('f-sideEffect'), caution: get('f-caution'),
+    note: get('f-note'), idx2:'', idx3:'', cat2:'', cat3:''
+  };
+  if(editId !== null){
+    const idx = DRUGS.findIndex(x=>x.id===editId);
+    if(idx>=0) DRUGS[idx]=d;
+  } else {
+    DRUGS.push(d);
+  }
+  save();
+  closeModal();
+  renderTable();
+}
+
+function deleteDrug(){
+  if(!confirm('確定刪除此藥品？')) return;
+  DRUGS = DRUGS.filter(d=>d.id!==editId);
+  save();
+  closeModal();
+  renderTable();
+}
+
+function closeModal(){
+  document.getElementById('modal-bg').classList.remove('show');
+}
+
+function save(){
+  localStorage.setItem('drugs_data', JSON.stringify(DRUGS));
+}
+
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(DRUGS,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'drugs.json';
+  a.click();
+}
+
+function importJSON(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!Array.isArray(data)) throw new Error('格式錯誤');
+      DRUGS = data;
+      save();
+      renderTable();
+      alert(`成功匯入 ${data.length} 筆藥品`);
+    }catch(err){alert('匯入失敗：'+err.message);}
+  };
+  reader.readAsText(file,'utf-8');
+  input.value='';
+}
+
+// Init: if localStorage empty, show a notice
+if(!localStorage.getItem('drugs_data')){
+  document.querySelector('.export-section h3').textContent = '⚠️ 後台資料與查詢頁面獨立';
+  document.querySelector('.export-section span').textContent = '後台使用瀏覽器本地儲存。請先從查詢頁的 drugs.json 匯入資料，編輯後再匯出覆蓋即可。';
+}
+
+renderTable();
+</script>
+</body>
+</html>
