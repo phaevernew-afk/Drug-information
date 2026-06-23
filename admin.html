@@ -3,210 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用藥管理後台</title>
-    <!-- 引入 Tailwind CSS 樣式庫 -->
+    <title>本院用藥查詢系統</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- 引入關鍵套件：SheetJS 讓網頁能直接讀取 Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
+<body class="bg-slate-100 min-h-screen text-slate-800">
 
-    <!-- 頂部導覽列 -->
-    <header class="bg-slate-800 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
-                📝 用藥管理後台
+    <header class="bg-[#1e40af] text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-[1600px] mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wide flex items-center gap-2">
+                📱 本院用藥查詢系統
             </h1>
-            <a href="index.html" class="text-sm bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-medium transition">
-                ← 回查詢介面
-            </a>
+            <span class="text-sm opacity-90" id="header-count">共 0 筆藥品</span>
         </div>
     </header>
 
-    <!-- 後台功能操作區 -->
-    <main class="max-w-7xl mx-auto px-4 mt-6">
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-wrap">
+    <div class="max-w-[1600px] mx-auto px-4 mt-4 flex gap-4">
+        
+        <aside class="w-64 shrink-0 flex flex-col justify-between min-h-[calc(100vh-5rem)] pb-6">
+            <div>
+                <span class="text-xs font-semibold text-slate-400 block mb-2 px-2">藥品分類</span>
+                <nav class="space-y-1" id="category-menu">
+                    <button class="w-full text-left bg-blue-50 text-blue-700 font-medium px-3 py-2 rounded-lg text-sm flex justify-between items-center">
+                        <span>全部藥品</span>
+                        <span class="bg-blue-200 text-blue-800 text-xs px-2 py-0.5 rounded-full" id="side-total-count">0</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 mt-6">
+                <a href="admin.html" class="w-full text-center block text-xs border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-500 px-3 py-2 rounded-lg font-medium transition shadow-sm">
+                    ⚙️ 進入後台管理
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 space-y-4">
+            
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
                 
-                <!-- 搜尋與檔案匯入區 -->
-                <div class="flex items-center gap-3 flex-wrap">
-                    <input type="text" id="admin-search" placeholder="搜尋藥品..." 
-                           class="border border-slate-300 rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-slate-500">
+                <div class="flex gap-3">
+                    <div class="relative flex-1">
+                        <input type="text" id="main-search" placeholder="🔍 搜尋藥品名稱、學名、中文名、適應症..." 
+                               class="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white transition">
+                    </div>
                     
-                    <!-- 隱藏的實際 File Input，改用按鈕觸發 -->
-                    <input type="file" id="excel-file-input" accept=".xls,.xlsx" class="hidden">
-                    <button onclick="document.getElementById('excel-file-input').click()" 
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
-                        📊 匯入 Excel 檔案
-                    </button>
-
-                    <button id="import-json-btn" class="border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">
-                        ⬆️ 匯入 JSON
-                    </button>
+                    <select id="sub-category-select" class="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-600 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">全部細項分類</option>
+                    </select>
                 </div>
 
-                <!-- 匯出與狀態區 -->
-                <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-slate-500" id="admin-count">共 0 筆</span>
-                    <button id="export-json-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
-                        📥 匯出 JSON
-                    </button>
+                <div class="flex flex-wrap gap-1 items-center pt-2 border-t border-slate-100" id="alphabet-filter">
+                    <button class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium" data-letter="ALL">全部</button>
                 </div>
-
             </div>
 
-            <!-- 提示警告 -->
-            <div class="mt-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm flex flex-col md:flex-row justify-between gap-2">
-                <span>⚠️ <strong>後台資料與查詢頁面獨立：</strong>此後台目前直接在瀏覽器記憶體中處理。請點擊「匯入 Excel」讀取最新檔案，確認表格正確後，點擊「匯出 JSON」並覆蓋到 GitHub 專案中即可更新。</span>
-            </div>
-        </div>
+            <div class="text-xs text-slate-400 px-1" id="filter-result-count">共 0 筆藥品</div>
 
-        <!-- 藥品表格顯示區 -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 text-sm font-semibold">
-                            <th class="p-4 w-16">ID</th>
-                            <th class="p-4">藥品名稱</th>
-                            <th class="p-4">中文名</th>
-                            <th class="p-4">學名</th>
-                            <th class="p-4">分類 (藥理作用)</th>
-                            <th class="p-4">適應症</th>
-                            <th class="p-4 w-20 text-center">孕婦</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-table-body" class="divide-y divide-slate-100 text-sm">
-                        <tr>
-                            <td colspan="7" class="text-center py-12 text-slate-400">目前暫無資料，請點擊上方按鈕匯入 Excel 或 JSON 檔案。</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="space-y-3" id="drug-list-container">
+                <div class="bg-white p-8 rounded-xl text-center text-slate-400 border border-slate-200">
+                    正在載入藥品資料，請稍候...
+                </div>
             </div>
-        </div>
-    </main>
+
+        </main>
+    </div>
 
     <script>
-        let currentDrugsData = [];
+        let currentDrugsData = []; 
+        let searchKeyword = '';
+        let selectedLetter = 'ALL';
 
-        // 監聽 Excel 檔案上傳
-        document.getElementById('excel-file-input').addEventListener('change', handleExcelUpload);
-        
-        // 監聽 匯出 JSON 按鈕
-        document.getElementById('export-json-btn').addEventListener('click', exportJsonFile);
-
-        // 監聽 匯入 JSON 按鈕 (保留原功能)
-        document.getElementById('import-json-btn').addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = event => {
-                    try {
-                        currentDrugsData = JSON.parse(event.target.result);
-                        renderAdminTable(currentDrugsData);
-                    } catch(err) { alert('JSON 格式解析錯誤！'); }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
+        // 動態生成 A~Z 與 3、f 按鈕 (照你圖上的格式)
+        const alphabetContainer = document.getElementById('alphabet-filter');
+        const alphabet = ['3', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Z', 'f'];
+        alphabet.forEach(let => {
+            const btn = document.createElement('button');
+            btn.className = 'border border-slate-200 hover:bg-slate-100 text-slate-600 px-2.5 py-1 rounded text-xs font-mono font-medium transition bg-white cursor-pointer';
+            btn.textContent = let;
+            btn.setAttribute('data-letter', let);
+            alphabetContainer.appendChild(btn);
         });
 
-        // 監聽即時關鍵字搜尋
-        document.getElementById('admin-search').addEventListener('input', (e) => {
-            const kw = e.target.value.toLowerCase().trim();
-            if(!kw) {
-                renderAdminTable(currentDrugsData);
-                return;
+        // 網頁開啟載入 JSON 資料
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('drugs.json')
+                .then(res => res.json())
+                .then(data => {
+                    currentDrugsData = data;
+                    document.getElementById('header-count').textContent = `共 ${data.length} 筆藥品`;
+                    document.getElementById('side-total-count').textContent = data.length;
+                    applyFilterAndRender();
+                })
+                .catch(err => {
+                    document.getElementById('drug-list-container').innerHTML = `
+                        <div class="bg-white p-8 rounded-xl text-center text-red-500 font-medium border border-slate-200">
+                            ❌ 讀取資料失敗，請檢查 drugs.json 是否上傳。
+                        </div>
+                    `;
+                });
+        });
+
+        // 監聽合併後的萬能搜尋框
+        document.getElementById('main-search').addEventListener('input', (e) => {
+            searchKeyword = e.target.value.toLowerCase().trim();
+            applyFilterAndRender();
+        });
+
+        // 監聽字母篩選
+        alphabetContainer.addEventListener('click', (e) => {
+            if(e.target.tagName === 'BUTTON') {
+                Array.from(alphabetContainer.children).forEach(btn => {
+                    btn.className = 'border border-slate-200 hover:bg-slate-100 text-slate-600 px-2.5 py-1 rounded text-xs font-mono font-medium transition bg-white cursor-pointer';
+                });
+                e.target.className = 'bg-blue-600 text-white px-2.5 py-1 rounded text-xs font-mono font-medium cursor-pointer';
+                
+                selectedLetter = e.target.getAttribute('data-letter');
+                applyFilterAndRender();
             }
-            const filtered = currentDrugsData.filter(d => {
-                return [d['藥品名稱'], d['藥品中文名'], d['學名名稱'], d['藥理作用'], d['適應症']]
-                       .some(f => (f || '').toString().toLowerCase().includes(kw));
-            });
-            renderAdminTable(filtered, false); // 不更新總筆數計數，只做畫面篩選
         });
 
-        // 處理 Excel 檔案讀取
-        function handleExcelUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        // 核心過濾邏輯
+        function applyFilterAndRender() {
+            let filtered = currentDrugsData;
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                
-                // 優先尋找名稱叫作「藥品」的工作表，找不到就抓第一張
-                const sheetName = workbook.SheetNames.includes('藥品') ? '藥品' : workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-                
-                // 將 Excel 轉換成 JSON 陣列物件
-                const rawJson = XLSX.utils.sheet_to_json(worksheet);
-                
-                if (rawJson.length === 0) {
-                    alert('Excel 內沒有發現任何資料！');
-                    return;
-                }
+            // 1. 合併搜尋框：同一個關鍵字，同時對比多個欄位 (OR 邏輯)
+            if (searchKeyword) {
+                filtered = filtered.filter(d => {
+                    return [
+                        d['藥品名稱'], 
+                        d['藥品中文名'], 
+                        d['學名名稱'], 
+                        d['藥理作用'], 
+                        d['適應症']
+                    ].some(field => (field || '').toString().toLowerCase().includes(searchKeyword));
+                });
+            }
 
-                currentDrugsData = rawJson;
-                renderAdminTable(currentDrugsData);
-                alert(`成功讀取 Excel！共匯入 ${currentDrugsData.length} 筆藥品資料。`);
-            };
-            reader.readAsArrayBuffer(file);
-            // 清空 input 讓同一個檔案可以重複上傳觸發
-            e.target.value = '';
+            // 2. 字母篩選
+            if (selectedLetter !== 'ALL') {
+                filtered = filtered.filter(d => {
+                    const firstChar = (d['藥品名稱'] || '').toString().trim().charAt(0).toUpperCase();
+                    return firstChar === selectedLetter;
+                });
+            }
+
+            document.getElementById('filter-result-count').textContent = `共 ${filtered.length} 筆藥品`;
+            renderDrugCards(filtered);
         }
 
-        // 渲染後台表格
-        function renderAdminTable(data, updateCount = true) {
-            const tbody = document.getElementById('admin-table-body');
-            if(updateCount) {
-                document.getElementById('admin-count').textContent = `共 ${data.length} 筆`;
-            }
-
+        // 生成精美的卡片清單
+        function renderDrugCards(data) {
+            const container = document.getElementById('drug-list-container');
+            
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-12 text-slate-400">找不到符合搜尋條件的資料</td></tr>`;
+                container.innerHTML = `<div class="bg-white p-8 rounded-xl text-center text-slate-400 border border-slate-200">找不到符合條件的藥品</div>`;
                 return;
             }
 
-            tbody.innerHTML = data.map(drug => {
+            container.innerHTML = data.map(drug => {
+                const pregClass = drug['孕婦分級'] ? `<span class="bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded text-xs font-bold">孕${drug['孕婦分級']}</span>` : '';
+                const code = (drug['藥品名稱'] || 'DRUG').toString().substring(0, 3).toUpperCase();
+                
                 return `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-4 font-mono text-slate-400">${drug['識別碼'] || ''}</td>
-                        <td class="p-4 font-medium text-slate-900">${drug['藥品名稱'] || ''}</td>
-                        <td class="p-4 text-slate-700">${drug['藥品中文名'] || ''}</td>
-                        <td class="p-4 text-slate-600 text-xs font-mono">${drug['學名名稱'] || ''}</td>
-                        <td class="p-4"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">${drug['藥理作用'] || ''}</span></td>
-                        <td class="p-4 text-slate-500 max-w-xs truncate" title="${drug['適應症'] || ''}">${drug['適應症'] || ''}</td>
-                        <td class="p-4 text-center font-bold text-red-600">${drug['孕婦分級'] || ''}</td>
-                    </tr>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-blue-300 transition flex items-start gap-4">
+                        <div class="bg-blue-50 text-blue-600 font-bold px-2.5 py-1 rounded text-xs font-mono shrink-0 mt-1">
+                            ${code}
+                        </div>
+                        <div class="flex-1 space-y-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-bold text-slate-900 text-base">${drug['藥品名稱'] || ''}</h3>
+                                <span class="text-sm text-slate-500">${drug['藥品中文名'] || ''}</span>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap text-xs text-slate-500">
+                                <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${drug['藥理作用'] || ''}</span>
+                                ${pregClass}
+                            </div>
+                            <p class="text-sm text-slate-600 pt-1">${drug['適應症'] || ''}</p>
+                        </div>
+                    </div>
                 `;
             }).join('');
-        }
-
-        // 匯出成新的 drugs.json 檔案
-        function exportJsonFile() {
-            if (currentDrugsData.length === 0) {
-                alert('目前沒有任何資料可以匯出！請先匯入 Excel。');
-                return;
-            }
-            
-            const jsonString = JSON.stringify(currentDrugsData, null, 2);
-            const blob = new Blob([jsonString], { type: "application/json;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            
-            const downloadLink = document.createElement("a");
-            downloadLink.href = url;
-            downloadLink.download = "drugs.json"; // 預設下載檔名
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(url);
         }
     </script>
 </body>
