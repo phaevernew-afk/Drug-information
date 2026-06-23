@@ -12,65 +12,64 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 pb-16">
+<body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
 
-    <!-- 頂部導覽列（降低管理後台的突兀感，改為簡約清新風格） -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
-            <h1 class="text-lg font-bold text-slate-600 flex items-center gap-2">
-                ⚙️ 藥品資料維護面板
+    <!-- 頂部導覽列 -->
+    <header class="bg-slate-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
+                📝 用藥管理後台
             </h1>
-            <a href="index.html" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition shadow-sm">
-                ← 返回查詢大廳
+            <a href="index.html" class="text-sm bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-medium transition">
+                ← 回查詢介面
             </a>
         </div>
     </header>
 
-    <!-- 主操作區 -->
+    <!-- 後台功能操作區 -->
     <main class="max-w-7xl mx-auto px-4 mt-6">
-        
-        <!-- 工具列：整合所有操作與搜尋 -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
-            
-            <!-- 左側：多合一整合型搜尋框與計數 -->
-            <div class="flex items-center gap-3 flex-1">
-                <div class="relative flex-1 max-w-md">
-                    <input type="text" id="admin-search" placeholder="輸入藥名、中文、學名、分類或適應症搜尋..." 
-                           class="w-full border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-wrap">
+                
+                <!-- 搜尋與檔案匯入區 -->
+                <div class="flex items-center gap-3 flex-wrap">
+                    <input type="text" id="admin-search" placeholder="搜尋藥品..." 
+                           class="border border-slate-300 rounded-lg px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-slate-500">
+                    
+                    <!-- 隱藏的實際 File Input，改用按鈕觸發 -->
+                    <input type="file" id="excel-file-input" accept=".xls,.xlsx" class="hidden">
+                    <button onclick="document.getElementById('excel-file-input').click()" 
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
+                        📊 匯入 Excel 檔案
+                    </button>
+
+                    <button id="import-json-btn" class="border border-slate-300 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+                        ⬆️ 匯入 JSON
+                    </button>
                 </div>
-                <span class="text-sm font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md shrink-0" id="admin-count">
-                    共 0 筆
-                </span>
+
+                <!-- 匯出與狀態區 -->
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-slate-500" id="admin-count">共 0 筆</span>
+                    <button id="export-json-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
+                        📥 匯出 JSON
+                    </button>
+                </div>
+
             </div>
 
-            <!-- 右側：檔案匯入與匯出按鈕區 -->
-            <div class="flex items-center gap-2 shrink-0">
-                <!-- 隱藏的實際 File Input -->
-                <input type="file" id="excel-file-input" accept=".xls,.xlsx" class="hidden">
-                <button onclick="document.getElementById('excel-file-input').click()" 
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                    📊 匯入 Excel
-                </button>
-
-                <button id="import-json-btn" class="border border-slate-300 hover:bg-slate-100 text-slate-600 px-3 py-2 rounded-lg text-sm font-medium transition">
-                    ⬆️ 備份 JSON
-                </button>
-
-                <div class="h-6 w-[1px] bg-slate-200 mx-1"></div>
-
-                <button id="export-json-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                    📥 匯出新 JSON
-                </button>
+            <!-- 提示警告 -->
+            <div class="mt-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm flex flex-col md:flex-row justify-between gap-2">
+                <span>⚠️ <strong>後台資料與查詢頁面獨立：</strong>此後台目前直接在瀏覽器記憶體中處理。請點擊「匯入 Excel」讀取最新檔案，確認表格正確後，點擊「匯出 JSON」並覆蓋到 GitHub 專案中即可更新。</span>
             </div>
         </div>
 
-        <!-- 藥品數據表格 -->
+        <!-- 藥品表格顯示區 -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider">
+                        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 text-sm font-semibold">
                             <th class="p-4 w-16">ID</th>
                             <th class="p-4">藥品名稱</th>
                             <th class="p-4">中文名</th>
@@ -82,18 +81,12 @@
                     </thead>
                     <tbody id="admin-table-body" class="divide-y divide-slate-100 text-sm">
                         <tr>
-                            <td colspan="7" class="text-center py-12 text-slate-400">目前暫無資料，請點擊上方按鈕匯入 Excel 檔案。</td>
+                            <td colspan="7" class="text-center py-12 text-slate-400">目前暫無資料，請點擊上方按鈕匯入 Excel 或 JSON 檔案。</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- 下放到最底部、樣式淡化不顯眼的系統說明指引 -->
-        <footer class="mt-8 border-t border-slate-200/60 pt-4 text-xs text-slate-400 leading-relaxed max-w-3xl mx-auto text-center">
-            <p>💡 <strong>維護指引：</strong> 本頁面數據於瀏覽器暫存中運作。請點擊「匯入 Excel」選取最新藥品檔，確認清單無誤後，點擊「匯出新 JSON」將下載的 <code>drugs.json</code> 覆蓋回 GitHub 專案庫中即可完成全院發佈。</p>
-        </footer>
-
     </main>
 
     <script>
@@ -105,7 +98,7 @@
         // 監聽 匯出 JSON 按鈕
         document.getElementById('export-json-btn').addEventListener('click', exportJsonFile);
 
-        // 監聽 匯入 JSON 按鈕 (保留備份讀取功能)
+        // 監聽 匯入 JSON 按鈕 (保留原功能)
         document.getElementById('import-json-btn').addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -124,7 +117,7 @@
             input.click();
         });
 
-        // 整合一體化搜尋監聽（同時比對五個重要藥品屬性欄位）
+        // 監聽即時關鍵字搜尋
         document.getElementById('admin-search').addEventListener('input', (e) => {
             const kw = e.target.value.toLowerCase().trim();
             if(!kw) {
@@ -135,7 +128,7 @@
                 return [d['藥品名稱'], d['藥品中文名'], d['學名名稱'], d['藥理作用'], d['適應症']]
                        .some(f => (f || '').toString().toLowerCase().includes(kw));
             });
-            renderAdminTable(filtered, false); // 只進行畫面即時篩選，不更動左側資料庫總計數值
+            renderAdminTable(filtered, false); // 不更新總筆數計數，只做畫面篩選
         });
 
         // 處理 Excel 檔案讀取
@@ -156,16 +149,17 @@
                 const rawJson = XLSX.utils.sheet_to_json(worksheet);
                 
                 if (rawJson.length === 0) {
-                    alert('Excel 內沒有發現任何有效資料！');
+                    alert('Excel 內沒有發現任何資料！');
                     return;
                 }
 
                 currentDrugsData = rawJson;
                 renderAdminTable(currentDrugsData);
-                alert(`Excel 讀取完畢！共成功載入 ${currentDrugsData.length} 筆藥品，您可以進行即時搜尋核對。`);
+                alert(`成功讀取 Excel！共匯入 ${currentDrugsData.length} 筆藥品資料。`);
             };
             reader.readAsArrayBuffer(file);
-            e.target.value = ''; // 清空以利重複觸發
+            // 清空 input 讓同一個檔案可以重複上傳觸發
+            e.target.value = '';
         }
 
         // 渲染後台表格
@@ -189,16 +183,16 @@
                         <td class="p-4 text-slate-600 text-xs font-mono">${drug['學名名稱'] || ''}</td>
                         <td class="p-4"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs">${drug['藥理作用'] || ''}</span></td>
                         <td class="p-4 text-slate-500 max-w-xs truncate" title="${drug['適應症'] || ''}">${drug['適應症'] || ''}</td>
-                        <td class="p-4 text-center font-bold text-red-600 text-xs">${drug['孕婦分級'] || ''}</td>
+                        <td class="p-4 text-center font-bold text-red-600">${drug['孕婦分級'] || ''}</td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // 匯出成網頁所需的 drugs.json 檔案
+        // 匯出成新的 drugs.json 檔案
         function exportJsonFile() {
             if (currentDrugsData.length === 0) {
-                alert('目前無暫存資料可供匯出，請先匯入 Excel 檔案。');
+                alert('目前沒有任何資料可以匯出！請先匯入 Excel。');
                 return;
             }
             
@@ -208,7 +202,7 @@
             
             const downloadLink = document.createElement("a");
             downloadLink.href = url;
-            downloadLink.download = "drugs.json";
+            downloadLink.download = "drugs.json"; // 預設下載檔名
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
